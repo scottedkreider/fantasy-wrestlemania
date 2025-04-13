@@ -1,78 +1,83 @@
-const matches = [
-  {
-    id: 1,
-    day: 1,
-    titleMatch: true,
-    champion: "Roman Reigns",
-    wrestlerA: "Roman Reigns",
-    wrestlerB: "Cody Rhodes",
-  },
-  {
-    id: 2,
-    day: 2,
-    titleMatch: false,
-    champion: null,
-    wrestlerA: "Dominik Mysterio",
-    wrestlerB: "Finn Bálor",
-  }
-];
+let matches = [];
 
-// User picks
-const picks = {
-  Scott: {
-    1: { winner: "Cody Rhodes" },
-    2: { winner: "Finn Bálor" },
-    outsideGuess: { 1: 2, 2: 1 }
-  },
-  GF: {
-    1: { winner: "Roman Reigns" },
-    2: { winner: "Dominik Mysterio" },
-    outsideGuess: { 1: 1, 2: 2 }
-  }
-};
+function startSetup() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('setup').style.display = 'block';
+  addMatchForm();
+}
 
-// Actual results
-const results = {
-  1: {
-    winner: "Cody Rhodes",
-    interference: false
-  },
-  2: {
-    winner: "Finn Bálor",
-    interference: true
-  }
-};
+function addMatchForm() {
+  const container = document.createElement('div');
+  container.className = 'match-form';
+  const matchId = `match-${Date.now()}`;
+  container.innerHTML = `
+    <label>Match Title: <input type="text" name="title" /></label><br/>
+    <label>Day: 
+      <select name="day">
+        <option value="1">Day 1</option>
+        <option value="2">Day 2</option>
+      </select>
+    </label><br/>
+    <label>Is Title Match? <input type="checkbox" name="isTitle" /></label><br/>
+    <label>Champion Name (if title match): <input type="text" name="champion" /></label><br/>
+    <div>
+      <strong>Participants:</strong><br/>
+      <input type="text" name="participant" placeholder="Enter participant 1" />
+      <input type="text" name="participant" placeholder="Enter participant 2" />
+      <input type="text" name="participant" placeholder="Enter participant 3 (optional)" />
+      <input type="text" name="participant" placeholder="Enter participant 4 (optional)" />
+    </div>
+  `;
+  document.getElementById('match-form-list').appendChild(container);
+}
 
-// Scoring logic
-function calculateScore(name) {
-  const user = picks[name];
-  let score = 0;
+function submitMatches() {
+  const matchForms = document.querySelectorAll('.match-form');
+  matches = [];
 
-  matches.forEach((match) => {
-    const pick = user[match.id];
-    const result = results[match.id];
+  matchForms.forEach(form => {
+    const inputs = form.querySelectorAll('input, select');
+    const title = inputs[0].value;
+    const day = parseInt(inputs[1].value);
+    const isTitle = inputs[2].checked;
+    const champion = inputs[3].value.trim();
+    const participants = [
+      inputs[4].value, inputs[5].value,
+      inputs[6].value, inputs[7].value
+    ].filter(p => p.trim() !== "");
 
-    if (pick && pick.winner === result.winner) {
-      score += 1;
-      if (match.titleMatch && match.champion !== result.winner) {
-        score += 1;
-      }
+    if (participants.length < 2) {
+      alert("Each match needs at least 2 participants.");
+      return;
     }
 
-    if (user.outsideGuess[match.day] === match.id && result.interference) {
-      score += 1;
-    }
+    matches.push({
+      id: Date.now() + Math.random(),
+      title,
+      day,
+      titleMatch: isTitle,
+      champion: isTitle ? champion : null,
+      participants
+    });
   });
 
-  return score;
+  document.getElementById('setup').style.display = 'none';
+  renderMatchSummary();
 }
 
-function renderScores() {
-  const app = document.getElementById("app");
-  app.innerHTML = `
-    <div class="match">Scott's Score: ${calculateScore("Scott")}</div>
-    <div class="match">GF's Score: ${calculateScore("GF")}</div>
-  `;
-}
+function renderMatchSummary() {
+  const summary = document.getElementById('summary');
+  summary.innerHTML = "<h2>Saved Matches</h2>";
 
-renderScores();
+  matches.forEach(match => {
+    summary.innerHTML += `
+      <div class="match">
+        <strong>${match.title}</strong> (Day ${match.day})<br/>
+        ${match.titleMatch ? `🏆 Title Match (Champion: ${match.champion})<br/>` : ""}
+        Participants: ${match.participants.join(", ")}
+      </div>
+    `;
+  });
+
+  summary.style.display = 'block';
+}

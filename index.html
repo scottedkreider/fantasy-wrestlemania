@@ -8,7 +8,20 @@
 </head>
 <body>
   <h1>Fantasy WrestleMania</h1>
-  <div id="app"></div>
+
+  <div id="landing">
+    <button onclick="startSetup()">Start Setup</button>
+  </div>
+
+  <div id="setup" style="display:none;">
+    <h2>Match Setup</h2>
+    <div id="match-form-list"></div>
+    <button onclick="addMatchForm()">Add Match</button>
+    <button onclick="submitMatches()">Save Matches</button>
+  </div>
+
+  <div id="summary" style="display:none;"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
